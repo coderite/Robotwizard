@@ -1,4 +1,4 @@
-import sun.misc.IOUtils;
+package GoogleCrawl;
 
 import java.io.*;
 
@@ -14,7 +14,7 @@ public class contentPraser {
 	public void start() {
 
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream stream = loader.getResourceAsStream("content");
+		InputStream stream = loader.getResourceAsStream("Travellers/content");
 
 		BufferedReader reader = null;
 		try {

@@ -1,4 +1,4 @@
-package BaseEntry;
+package ThreadedBaseTemplate;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * REQUIRE ITERATING OVER LARGE LISTS WITH WEBDRIVER
  */
 public class Main {
-	private String resourceLinks = "agentLinks";
+	private String resourceLinks = "Travellers/agentLinks";
 	private static List<String> sList;
 	private static final int NUMOFTHREADS = 3;
 

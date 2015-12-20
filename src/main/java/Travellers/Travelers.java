@@ -1,6 +1,5 @@
 package Travellers;
 
-import org.apache.commons.collections.list.SynchronizedList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -48,7 +47,7 @@ public class Travelers {
 
 	public void getAgentPages() {
 		ArrayList<String> list = new ArrayList<String>();
-		InputStream stream = getClass().getClassLoader().getResourceAsStream("agentPages");
+		InputStream stream = getClass().getClassLoader().getResourceAsStream("Travellers/agentPages");
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(stream));
@@ -114,7 +113,7 @@ public class Travelers {
 		ArrayList<String> list = new ArrayList<String>();
 		sList = Collections.synchronizedList(loadLinks()); // needs some work
 
-		InputStream stream = getClass().getClassLoader().getResourceAsStream("agentLinks");
+		InputStream stream = getClass().getClassLoader().getResourceAsStream("Travellers/agentLinks");
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(stream));
