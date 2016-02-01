@@ -1,12 +1,17 @@
 package ThreadedBaseTemplate;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
 	private String resourceLinks = "Travellers/agentLinks";
 	private static List<String> sList;
-	private static final int NUMOFTHREADS = 3;
+	private static final int NUMOFTHREADS = 10;
 
 	public static void main(String[] args) {
 		Main app = new Main();
@@ -83,13 +88,24 @@ public class Main {
 	}
 }
 
+
 /*
 ADD NEW CODE TO THE RUNNABLE CLASS BELOW
  */
 class Blast implements Runnable {
+    private static String urlBase = "http://ec2-52-27-159-114.us-west-2.compute.amazonaws.com:4444/wd/hub";
+
 	public void run() {
-		WebDriver driver = new FirefoxDriver();
-		while(Main.sListSize() != 0) {
+        WebDriver driver = null;
+        Capabilities capabilities = DesiredCapabilities.firefox();
+
+        try {
+            driver = new RemoteWebDriver(new URL(urlBase), capabilities);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+
+        while(Main.sListSize() != 0) {
 			String link = Main.shift();
 			System.out.println(link);
 			driver.get(link);
