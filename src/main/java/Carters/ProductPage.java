@@ -1,6 +1,7 @@
 package Carters;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -14,12 +15,15 @@ public class ProductPage {
     private WebDriver driver;
     private ArrayList<String> results = new ArrayList<String>();
     private String title;
+    private String url;
+    private String link;
     private String duplicatePreventionString = "na";
     private String duplicatePreventionString2 = "na";
 
     public ProductPage(WebDriver driver) {
         this.driver = driver;
     }
+    public ProductPage() { }
 
     public ArrayList<String> getResults() {
         return results;
@@ -29,11 +33,38 @@ public class ProductPage {
         return driver;
     }
 
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public void setDriver(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void multiStartInitiate(String link) {
+        driver.get(link);
+
+        // close the popup
+        WebDriverWait popupClose = new WebDriverWait(driver, 10);
+        popupClose.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".padiClose"))).click();
+        popupClose.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".vnothanks"))).click();
+        driver.manage().window().maximize();
+    }
+
+    public void multiStartRun(String link) {
+        driver.get(link);
+
+        // for each link do
+        collect();
+    }
+
     public void collect() {
         WebDriverWait wait = new WebDriverWait(driver, 10);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1")));
         WebElement titleElement = driver.findElement(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1"));
         title = titleElement.getText();
+
+        this.url = driver.getCurrentUrl();
 
         // get number of colors
         try {
@@ -150,7 +181,9 @@ public class ProductPage {
                     sb.append(salesPrice); // add sales price
 
                     System.out.println(sb.toString());
-                    new Carters().printItem(sb.toString());
+                    Helpers helper = new Helpers();
+                    helper.setOutputFile("resultsCarterFeb2.txt");
+                    helper.printItem(sb.toString());
                     results.add(sb.toString());
                 }
             }

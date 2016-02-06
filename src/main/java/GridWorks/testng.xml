@@ -9,5 +9,5 @@
         <classes>
             <class name="GridWorks.ThreadLocalDemo" />
         </classes>
-    </test> <!-- Test -->
+    </test> <!-- Sourcer -->
 </suite> <!-- Suite -->

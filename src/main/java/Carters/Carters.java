@@ -1,27 +1,18 @@
 package Carters;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by zenbox on 1/29/16.
  */
 public class Carters {
     private String link = "http://www.carters.com/carters-tops-baby-boy-shirts/888767323361.html";
-    private String outputFile = "resultsCarters2.txt";
     private ArrayList<String> urlList = new ArrayList<String>();
 
     public static void main(String[] args) {
@@ -57,18 +48,6 @@ public class Carters {
             //}
         }
         driver.close();
-    }
-
-    public void printItem(String text) {
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(new FileWriter(outputFile, true));
-            writer.println(text);
-        } catch (IOException ex) {
-            System.out.println("error : printing text");
-        } finally {
-            writer.close();
-        }
     }
 
     private ArrayList<String> loadLinks() {
