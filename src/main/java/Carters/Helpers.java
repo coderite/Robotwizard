@@ -1,8 +1,7 @@
 package Carters;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.ArrayList;
 
 /**
  * Created by zenbox on 2/1/2016.
@@ -26,5 +25,27 @@ public class Helpers {
                 writer.close();
             }
         }
+    }
+
+    public ArrayList<String> loadLinks(String filePath) {
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(filePath);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        ArrayList<String> list = new ArrayList<String>();
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                if(!line.startsWith("#")) {
+                    String[] tokens = line.split("html");
+                    line = tokens[0] + "html";
+
+                    if(!list.contains(line))
+                        list.add(line.trim());
+                }
+            }
+        }catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }
