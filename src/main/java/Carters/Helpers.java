@@ -19,7 +19,7 @@ public class Helpers {
             writer = new PrintWriter(new FileWriter(outputFile, true));
             writer.println(text);
         } catch (IOException ex) {
-            System.out.println("error : printing text");
+            System.out.println("error : printing text: " + ex.getMessage());
         } finally {
             if(writer != null) {
                 writer.close();
@@ -36,8 +36,8 @@ public class Helpers {
         try {
             while ((line = reader.readLine()) != null) {
                 if(!line.startsWith("#")) {
-                    String[] tokens = line.split("html");
-                    line = tokens[0] + "html";
+                   // String[] tokens = line.split("html");
+                   // line = tokens[0] + "html";
 
                     if(!list.contains(line))
                         list.add(line.trim());

@@ -1,5 +1,6 @@
 package SalesRabbit;
 
+import Carters.Helpers;
 import SalesRabbit.Indeed.Result;
 import SalesRabbit.Indeed.SearchResults;
 import com.google.gson.Gson;
@@ -37,10 +38,15 @@ public class Searcher {
             pages = 40;
 
         System.out.println("total results: " + totalResults + " " + pages + " pages");
+        Helpers helper = new Helpers();
+        helper.setOutputFile("virginiaResults.txt");
+        helper.printItem(query.getLocation() + "\t" + totalResults);
+        /*
         for(int i=0;i<pages;i++) {
             query.setStart(query.getStart() + 25);
             System.out.println(i + " " + query.getUrl());
         }
+        */
     }
 
     public String connect(String url) {

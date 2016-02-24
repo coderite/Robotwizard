@@ -1,145 +1,135 @@
 package Burton;
 
-
 import Carters.Helpers;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.eclipse.jetty.io.ClientConnectionFactory;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Created by zenbox on 2/6/16.
+ * Created by bittstream on 12/19/2015.
+ *
+ * BASE FRAME FOR MULTITHREADED SELENIUM PROJECTS
+ * USE THIS TEMPLATE TO START NEW PROJECTS THAT
+ * REQUIRE ITERATING OVER LARGE LISTS WITH WEBDRIVER
  */
 public class Main {
-    private String link = "http://www.burtonandburton.com/-CZZ---2016-CY1.asp?q=1";
-    private String baseLink = "http://www.burtonandburton.com/-CZZ---2016-CY";
-    private String postLink = ".asp?q=1";
-    private WebDriver driver;
+	private String resourceLinks = "Burton/failedLinks";
+	private static List<String> sList;
+	private static final int NUMOFTHREADS = 1;
 
-    public static void main(String[] args) {
-        Main app = new Main();
-        app.start();
-    }
+	public static void main(String[] args) {
+		Main app = new Main();
+		app.start();
+	}
 
-    public void start() {
-        System.setProperty("webdriver.chrome.driver", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome");
-        driver = new FirefoxDriver();
-        driver.get(link);
+	public void start() {
+		ArrayList<String> list = loadLinks();
+		sList = Collections.synchronizedList(list);
 
-        WebDriverWait wait = new WebDriverWait(driver, 30);
-        // String nextPageCss = "input.listPagingImg";
-        String nextPageCss = "div.listPaging:nth-child(6) > div:nth-child(1) > input:nth-child(8)";
+		long startTime = System.currentTimeMillis();
+		ExecutorService executor = Executors.newFixedThreadPool(NUMOFTHREADS);
+		for(int i=0;i<NUMOFTHREADS;i++){
+			executor.execute(new Blast());
+		}
+		executor.shutdown();
 
-        // ArrayList<String> list = new Helpers().loadLinks("Burton/missedLinks");
-        for(int i=1;i<=592;i++) {
-            String page = baseLink + i + postLink;
-            //String page = list.get(i);
-            System.out.println("Opening page: #" + i);
+		try {
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		long endTime   = System.currentTimeMillis();
+		long totalTime = endTime - startTime;
+		System.out.println(totalTime + " ms");
+	}
 
-            Helpers helper = new Helpers();
-            helper.setOutputFile("burtonProductLinksReal.txt");
-            helper.printItem("Opening page: " + page);
+	private ArrayList<String> loadLinks() {
+		InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceLinks);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		ArrayList<String> list = new ArrayList<String>();
+
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				if(!line.startsWith("#"))
+					list.add(line.trim());
+			}
+		}catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return list;
+	}
+
+	public static synchronized String shift() {
+		if(sList.size() > 0) {
+			String item = sList.get(0);
+			sList.remove(0);
+			return item;
+		}
+		return null;
+	}
+
+	public static synchronized int sListSize() {
+		return sList.size();
+	}
+}
 
 
-            try {
-                driver.get(page);
-                if(i==1) { // only do this on the first page
-                    String itemsPerPage = "#three";
-                    boolean endItemsPerPage;
-                    do {
-                        try {
-                            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(itemsPerPage))).click();
-                            endItemsPerPage = true;
-                        } catch (NoSuchElementException ex) {
-                            endItemsPerPage = false;
-                        }
-                    } while(!endItemsPerPage);
-                }
-                getLinks(driver.getPageSource());
-
-            } catch (Exception ex) {
-                Helpers exceptionHelper = new Helpers();
-                exceptionHelper.setOutputFile("BurtonSkipped.txt");
-                exceptionHelper.printItem(page);
-                try {
-                    Thread.sleep(5000);
-                } catch (Exception exh) {
-
-                }
-            }
-        }
-
-        System.out.println("done");
-
- /*       String itemsPerPage = "#one";
-        boolean endItemsPerPage;
-        do {
-            try {
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(itemsPerPage))).click();
-                endItemsPerPage = true;
-            } catch (NoSuchElementException ex) {
-                endItemsPerPage = false;
-            }
-        } while(!endItemsPerPage);*/
 /*
-        List<WebElement> listPages = driver.findElements(By.cssSelector("div.listPaging"));
-        System.out.println("list pages: " + listPages.size());
+ADD NEW CODE TO THE RUNNABLE CLASS BELOW
+ */
+class Blast implements Runnable {
+	String unique = UUID.randomUUID().toString();
 
-        for(WebElement page : listPages) {
-            System.out.println(page.getAttribute("value"));
-        }
+	public void run() {
+        WebDriver driver = new FirefoxDriver();
+		HomePage homepage = new HomePage(driver);
+		homepage.login("remusparty", "remusparty");
+		driver = homepage.getDriver();
 
-        String currentUrl = "";
-        boolean end = true;
-        do {
-            try {
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(nextPageCss))).click();
-                currentUrl = driver.getCurrentUrl();
-                end = false;
-                getLinks(driver.getPageSource());
-            } catch (Exception ex) {
-                String body = driver.findElement(By.cssSelector("body > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1)")).getText();
-                if(body.contains("Query timeout expired")) {
-                    System.out.println("caught a time out!");
-                    driver.navigate().back();
-                    try {
-                        Thread.sleep(3000);
-                    } catch(Exception exh) {
-
-                    }
-                } else {
-                    System.out.println("probably no more products left");
-                    end = true;
-                }
-            }
-        } while(!end);*/
-        driver.quit();
-
-    }
-
-    public void getLinks(String source) {
-        Document doc = Jsoup.parse(source);
-        Elements gridBoxLinks = doc.select(".gridBox a");
-
-        int count = 1;
-        for(Element link : gridBoxLinks) {
-            String url = "http://www.burtonandburton.com" + link.attr("href");
-            url = url.replaceAll(".asp-DYZ", "-DYZ").replaceAll("store//", "");
-            System.out.println("\t" + count++ + " " + url);
-
-            Helpers helper = new Helpers();
-            helper.setOutputFile("burtonProductLinksReal.txt");
-            helper.printItem(url);
-        }
-    }
+		Helpers failedPageWriter = new Helpers();
+		Helpers writer = new Helpers();
+		failedPageWriter.setOutputFile("Results/Burton/failedPages.txt");
+		writer.setOutputFile("Results/Burton/" + unique + ".txt");
 
 
+		while(Main.sListSize() != 0) {
+			String link = Main.shift();
+			System.out.println(link);
+
+			try {
+				ProductPage productPage = new ProductPage(driver);
+				productPage.setPageLink(link);
+				productPage.collect();
+				writer.printItem(productPage.getItem());
+			} catch (Exception ex) {
+				System.out.println("ERROR, SKIPPING");
+				ex.printStackTrace();
+				failedPageWriter.printItem(link); // add to skipped list
+			}
+			System.out.println(Main.sListSize());
+		}
+		driver.close();
+		System.out.println("all done");
+	}
 }
