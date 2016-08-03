@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.io.*;
@@ -23,14 +24,12 @@ public class test {
     }
 
     public void start() {
-        MathOperation addition = (int a, int b) -> a + b;
-        MathOperation subtraction = (int a, int b) -> a - b;
 
-        System.out.println(operate(4, 5, addition));
-        System.out.println(operate(5,2, subtraction));
-
-        GreetingService service = message -> System.out.println("Hello " + message);
-        service.sayMessage("ok");
+        System.setProperty("webdriver.chrome.driver", "ChromeDriver/chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
+        driver.get("http://www.google.com");
+        WebDriver driver2 = new ChromeDriver();
+        driver2.get("http://www.yahoo.com");
 
 
     }

@@ -118,10 +118,10 @@ class Blast implements Runnable {
 			System.out.println(link);
 
 			try {
-				ProductPage productPage = new ProductPage(driver);
-				productPage.setPageLink(link);
-				productPage.collect();
-				writer.printItem(productPage.getItem());
+				//ProductPage productPage = new ProductPage(driver);
+				//productPage.setPageLink(link);
+				//productPage.collect();
+				//writer.printItem(productPage.getItem());
 			} catch (Exception ex) {
 				System.out.println("ERROR, SKIPPING");
 				ex.printStackTrace();

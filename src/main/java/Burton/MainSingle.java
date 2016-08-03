@@ -32,9 +32,9 @@ public class MainSingle {
         HomePage homepage = new HomePage(driver);
         homepage.login("remusparty", "remusparty");
 
-        ProductPage productPage = new ProductPage(driver);
-        productPage.setPageLink("http://www.burtonandburton.com/HUGGER-BROWN-BEAR-DZ98494-DYZ---2016-DX5.asp?q=1");
-        productPage.collect();
+        //ProductPage productPage = new ProductPage(driver);
+        //productPage.setPageLink("http://www.burtonandburton.com/HUGGER-BROWN-BEAR-DZ98494-DYZ---2016-DX5.asp?q=1");
+        //productPage.collect();
 
 
         driver.manage().timeouts().implicitlyWait(10000, TimeUnit.SECONDS);

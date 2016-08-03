@@ -5,6 +5,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Created by zenbox on 1/30/16.
  */
@@ -14,8 +22,7 @@ public class CategoryPage {
     private String category;
     private Sourcer sourcer;
     private String outputFile;
-    // String link2 = "http://www.carters.com/carters-baby-boy-pajamas?cgid=carters-baby-boy-pajamas&startRow=0&sz=all";
-    // String link = "http://www.carters.com/carters-baby-boy-bottoms?&startRow=0&sz=all";
+    private Set<String> links = new HashSet<>();
 
     public CategoryPage(Sourcer sourcer) {
         this.sourcer = sourcer;
@@ -44,18 +51,34 @@ public class CategoryPage {
             String previous = "";
             for(Element product : products) {
                 String pageLink = product.attr("href");
+                pageLink = makePageLinkClean(pageLink);
                 System.out.println(count++ + " " + pageLink);
 
                 previous = pageLink;
 
-                Helpers helper = new Helpers();
-                helper.setOutputFile("carterFullProductLinks.txt");
                 if(!pageLink.contains("recs.richrelevance")) {
-                    helper.printItem(pageLink);
+                    links.add(pageLink);
                 }
             }
+
+            Helpers helper = new Helpers();
+            LocalDateTime timePoint = LocalDateTime.now();
+            String time = timePoint.getMonth() + "" + timePoint.getDayOfMonth();
+            helper.setOutputFile("Results/Carter/carterFullProductLinks_" + time + ".txt");
+
+            // Java 8 mag
+            links.forEach(link -> helper.printItem(link));
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public String makePageLinkClean(String link) {
+        return link.split("\\?")[0];
+    }
+
+
+    public List<String> getList() {
+        return null;
     }
 }

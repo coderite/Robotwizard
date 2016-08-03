@@ -3,7 +3,9 @@ package Carters;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -32,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
 	private String resourceLinks = "Carters/productLinks";
 	private static List<String> sList;
-	private static final int NUMOFTHREADS = 5;
+	private static final int NUMOFTHREADS = 6;
 
 	public static void main(String[] args) {
 		Main app = new Main();
@@ -40,6 +42,7 @@ public class Main {
 	}
 
 	public void start() {
+
 		ArrayList<String> list = loadLinks();
 		sList = Collections.synchronizedList(list);
 
@@ -97,17 +100,25 @@ ADD NEW CODE TO THE RUNNABLE CLASS BELOW
  */
 class Blast implements Runnable {
     public void run() {
-        WebDriver driver = new FirefoxDriver();
+		System.setProperty("webdriver.chrome.driver", "ChromeDriver/chromedriver.exe");
+		WebDriver driver = new ChromeDriver();
 		ThreadedProductPage page = new ThreadedProductPage(driver);
 
 		Helpers helper = new Helpers();
-		helper.setOutputFile(java.util.UUID.randomUUID().toString() + ".txt");
+		helper.setOutputFile("Results/Carter/" + java.util.UUID.randomUUID().toString() + ".txt");
 		page.setHelper(helper);
 
         while(Main.sListSize() != 0) {
 			String link = Main.shift();
-			System.out.println(link);
-			page.collect(link);
+			System.out.println("# left: " + Main.sListSize() + " link: " + link);
+			try {
+				page.collect(link);
+			} catch (Exception ex) {
+				Helpers help = new Helpers();
+				help.setOutputFile("Results/Carter/skipped.txt");
+				help.printItem(link);
+				ex.printStackTrace();
+			}
 		}
 		driver.close();
 	}

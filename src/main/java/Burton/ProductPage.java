@@ -1,6 +1,6 @@
 package Burton;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
+//import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -33,6 +33,7 @@ public class ProductPage {
         this.pageLink = pageLink;
     }
 
+    /*
     public void collect() {
         driver.get(pageLink);
 
@@ -183,5 +184,7 @@ public class ProductPage {
     public String getItem() {
         return product.getPrintItem();
     }
+    */
 }
+
 

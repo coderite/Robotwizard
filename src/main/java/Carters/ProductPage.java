@@ -60,8 +60,9 @@ public class ProductPage {
 
     public void collect() {
         WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1")));
-        WebElement titleElement = driver.findElement(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1"));
+        //wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("h1.product-name")));
+        WebElement titleElement = driver.findElement(By.cssSelector("h1.product-name"));
         title = titleElement.getText();
 
         this.url = driver.getCurrentUrl();
@@ -182,7 +183,7 @@ public class ProductPage {
 
                     System.out.println(sb.toString());
                     Helpers helper = new Helpers();
-                    helper.setOutputFile("resultsCarterFeb2.txt");
+                    helper.setOutputFile("resultsCarterMarch23.txt");
                     helper.printItem(sb.toString());
                     results.add(sb.toString());
                 }

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 /**
  * Created by zenbox on 1/29/16.
+ * RUN THIS AFTER GETTING THE INDIVIDUAL PRODUCT LINKS WITH SECTIONPAGE.java
+ * USE MAIN FOR MULTITHREADING
  */
 public class Carters {
     private String link = "http://www.carters.com/carters-tops-baby-boy-shirts/888767323361.html";
@@ -51,7 +53,7 @@ public class Carters {
     }
 
     private ArrayList<String> loadLinks() {
-        InputStream stream = getClass().getClassLoader().getResourceAsStream("Carters/categoryLinks");
+        InputStream stream = getClass().getClassLoader().getResourceAsStream("Results/Carters/carterFullProductLinks.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         ArrayList<String> list = new ArrayList<String>();
 

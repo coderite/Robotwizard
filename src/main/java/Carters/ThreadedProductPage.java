@@ -1,5 +1,9 @@
 package Carters;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -29,7 +33,7 @@ public class ThreadedProductPage {
         } catch (Exception ex) {
 
         }
-        closePopups("http://www.carters.com");
+        //closePopups("http://www.carters.com");
         try {
             Thread.sleep(5000);
         } catch (Exception ex) {
@@ -71,13 +75,14 @@ public class ThreadedProductPage {
         do {
             try {
                 WebDriverWait wait = new WebDriverWait(driver, 10);
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1")));
-                WebElement titleElement = driver.findElement(By.cssSelector("#pdpMain > div.product-detail-cols.clearfix > div.product-col-2.product-detail > h1"));
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("h1.product-name")));
+                WebElement titleElement = driver.findElement(By.cssSelector("h1.product-name"));
                 title = titleElement.getText();
 
                 // get number of colors
                 try {
-                    int colorsSize = driver.findElements(By.cssSelector("ul.swatches.color li")).size() - 1;
+                    int colorsSize = driver.findElements(By.cssSelector("#product-content .product-variations ul.swatches.color li")).size() - 1;
+                    System.out.println("number of colors: " + colorsSize);
 
                     colorLoop:
                     for (int i = 0; i < colorsSize; i++) {
@@ -98,107 +103,66 @@ public class ThreadedProductPage {
                             }
                         } while (!colorOk);
 
+                        try {
+                            Thread.sleep(1000);
+                        } catch (Exception ex) {
+
+                        }
+
 
                         // for each color get size
-                        int size = driver.findElements(By.cssSelector("ul.swatches.size li")).size();
+                        int size = driver.findElements(By.cssSelector("#product-content .product-variations ul.swatches.size li")).size();
+                        System.out.println("found sizes : " + size);
 
                         for (int j = 0; j < size; j++) {
-                            if (driver.findElements(By.cssSelector("ul.swatches.size li:nth-child(" + (j + 1) + ").emptyswatch.unselectable")).size() != 0) {
+                            if (driver.findElements(By.cssSelector("#product-content .product-variations ul.swatches.size li:nth-child(" + (j + 1) + ").emptyswatch.unselectable")).size() != 0) {
                                 continue;
                             }
 
-                            String sizeText = "";
-                            WebElement sizeElement;
-                            boolean ok = false;
-                            int retryCount = 0;
-                            do {
-                                try {
-                                    sizeElement = driver.findElement(By.cssSelector("ul.swatches.size li:nth-child(" + (j + 1) + ")"));
-                                    sizeText = sizeElement.getText();
-                                    sizeElement.click();
-                                    ok = true;
-                                } catch (ElementNotVisibleException ex) {
-                                    System.out.println("errror: sizes not visible");
-                                    ok = true;
-                                } catch (NoSuchElementException ex) {
-                                    System.out.println("error: no such element - size swatch " + link);
-                                    retryCount++;
-                                    if (retryCount > 2) {
+                            String sizeText = "N/A";
+                            if(size != 1) {
+                                WebElement sizeElement;
+                                boolean ok = false;
+                                int retryCount = 0;
+                                do {
+                                    try {
+                                        sizeElement = driver.findElement(By.cssSelector("#product-content .product-variations ul.swatches.size li:nth-child(" + (j + 1) + ")"));
+                                        sizeText = sizeElement.getText();
+                                        sizeElement.click();
+                                        ok = true;
+                                    } catch (ElementNotVisibleException ex) {
+                                        System.out.println("error: sizes not visible");
+                                        ok = true;
+                                    } catch (NoSuchElementException ex) {
+                                        System.out.println("error: no such element - size swatch " + link);
+                                        retryCount++;
+                                        if (retryCount > 2) {
                                             System.out.println(" breaking on " + link);
-                                        throw new RefreshException(); // go to outer loop to reload page and try again
+                                            throw new RefreshException(); // go to outer loop to reload page and try again
+                                        }
+                                    } catch (StaleElementReferenceException ex) {
+                                        System.out.println("error: stale element reference - size swatch");
                                     }
-                                } catch (StaleElementReferenceException ex) {
-                                    System.out.println("error: stale element reference - size swatch");
+                                } while (!ok);
+
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (Exception ex) {
+
                                 }
-                            } while (!ok);
-
-                            try {
-                                Thread.sleep(1000);
-                            } catch (Exception ex) {
-
                             }
 
                             // get MSRP standard price
-                            String standardPriceCss = "#product-content > div.product-price > span.price-standard";
-                            String standardPrice = "N/A";
-                            boolean isOk = false;
-                            try {
-                                do {
-                                    try {
-                                        WebElement msrpElement = driver.findElement(By.cssSelector(standardPriceCss));
-                                        standardPrice = msrpElement.getText();
-                                        standardPrice = standardPrice.replaceAll("MSRP\\*:", "").trim();
-                                        isOk = true;
-                                    } catch (StaleElementReferenceException ex) {
-                                        System.out.println("error: stale element reference - standard price");
-                                    }
-                                } while (!isOk);
-                            } catch (NoSuchElementException ex) {
-                                System.out.println("error: no such element - standard price");
-                            }
+                            String standardPrice = getMsrpPrice(driver);
 
                             // get sales price
-                            String salesPriceCss = "#product-content > div.product-price > span.price-sales";
-                            String salesPrice = "N/A";
-                            boolean salesPriceOk = false;
-                            try {
-                                do {
-                                    try {
-                                        WebElement salesPriceElement = driver.findElement(By.cssSelector(salesPriceCss));
-                                        salesPrice = salesPriceElement.getText();
-                                        salesPriceOk = true;
-                                    } catch (StaleElementReferenceException ex) {
-                                        System.out.println("error: stale element reference - sales price");
-                                    }
-                                } while (!salesPriceOk);
-                            } catch (NoSuchElementException ex) {
-                                System.out.println("error: no such element - sales price");
-                            }
-                            // get upc code
-                            String upcCss = ".product-number";
-                            String upc = "N/A";
-                            boolean upcOk = false;
-                            try {
-                                do {
-                                    try {
-                                        WebElement upcElement = driver.findElement(By.cssSelector(upcCss));
-                                        upc = upcElement.getText();
-                                        upc = upc.replaceAll("Style #", "").trim();
-                                        upcOk = true;
-                                    } catch (StaleElementReferenceException ex) {
-                                        System.out.println("error: stale element reference - product number");
-                                    }
-                                } while (!upcOk);
-                            } catch (NoSuchElementException ex) {
-                                System.out.println("error: no such element - product number");
-                            }
+                            String salesPrice = getSalesPrice(driver);
 
-                            String finalUrl = driver.getCurrentUrl().replaceAll("http://www.carters.com/", "");
-                            try {
-                                finalUrl = finalUrl.substring(0, finalUrl.indexOf("/")).replaceAll("carters-", "");
-                            } catch (Exception ex) {
-                                System.out.println("FINAL URL: something went wrong, digressing");
-                            }
+                            // get upc code
+                            String upc = getUpcCode(driver);
+
+                            // get final url
+                            String finalUrl = getFinalUrl(driver);
 
                             // build string
                             StringBuilder sb = new StringBuilder();
@@ -208,8 +172,8 @@ public class ThreadedProductPage {
                             sb.append(upc + ";"); // add upc code
                             sb.append(standardPrice + ";"); // add msrp standard price
                             sb.append(salesPrice + ";"); // add sales price
-                            sb.append(finalUrl); // add current url
-                            sb.append(url); // add full url for diagnostical purposes
+                            sb.append(finalUrl + ";"); // add current url
+                            sb.append(link); // add full url for diagnostical purposes
 
                             System.out.println(sb.toString());
                             helper.printItem(sb.toString());
@@ -236,5 +200,77 @@ public class ThreadedProductPage {
                 bigOkCount++;
             }
         } while(!bigOk); // end of big okay
+    }
+
+    public String getSalesPrice(WebDriver driver) {
+        String salesPriceCss = "span.price-sales";
+        String salesPrice = "N/A";
+        boolean salesPriceOk = false;
+        try {
+            do {
+                try {
+                    WebElement salesPriceElement = driver.findElement(By.cssSelector(salesPriceCss));
+                    salesPrice = salesPriceElement.getText();
+                    salesPriceOk = true;
+                } catch (StaleElementReferenceException ex) {
+                    System.out.println("error: stale element reference - sales price");
+                }
+            } while (!salesPriceOk);
+        } catch (NoSuchElementException ex) {
+            System.out.println("error: no such element - sales price");
+        }
+        return salesPrice;
+    }
+
+    public String getUpcCode(WebDriver driver) {
+        String upcCss = ".product-number";
+        String upc = "N/A";
+        boolean upcOk = false;
+        try {
+            do {
+                try {
+                    WebElement upcElement = driver.findElement(By.cssSelector(upcCss));
+                    upc = upcElement.getText();
+                    upc = upc.replaceAll("Style #", "").trim();
+                    upcOk = true;
+                } catch (StaleElementReferenceException ex) {
+                    System.out.println("error: stale element reference - product number");
+                }
+            } while (!upcOk);
+        } catch (NoSuchElementException ex) {
+            System.out.println("error: no such element - product number");
+        }
+        return upc;
+    }
+
+    public String getMsrpPrice(WebDriver driver) {
+        String standardPriceCss = "span.price-standard";
+        String standardPrice = "N/A";
+        boolean isOk = false;
+        try {
+            do {
+                try {
+                    WebElement msrpElement = driver.findElement(By.cssSelector(standardPriceCss));
+                    standardPrice = msrpElement.getText();
+                    standardPrice = standardPrice.replaceAll("MSRP\\*:", "").trim();
+                    isOk = true;
+                } catch (StaleElementReferenceException ex) {
+                    System.out.println("error: stale element reference - standard price");
+                }
+            } while (!isOk);
+        } catch (NoSuchElementException ex) {
+            System.out.println("error: no such element - standard price");
+        }
+        return standardPrice;
+    }
+
+    public String getFinalUrl(WebDriver driver) {
+        String finalUrl = driver.getCurrentUrl().replaceAll("http://www.carters.com/", "").replaceAll("null", "");
+        try {
+            finalUrl = finalUrl.substring(0, finalUrl.indexOf("/")).replaceAll("carters-", "");
+        } catch (Exception ex) {
+            System.out.println("FINAL URL: something went wrong, digressing");
+        }
+        return finalUrl;
     }
 }
